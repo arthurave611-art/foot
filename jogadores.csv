@@ -1,9 +1,108 @@
-nome,posicao,time,força,valor
-Neymar Jr,ATA,Al-Hilal,89,500000
-Lionel Messi,ATA,Inter Miami,90,600000
-Vinícius Jr,ATA,Real Madrid,89,800000
-Casemiro,MEI,Man. United,84,300000
-Marquinhos,ZAG,PSG,87,400000
-Alisson,GOL,Liverpool,89,450000
-Arrascaeta,MEI,Flamengo,82,150000
-Hulk,ATA,Atlético-MG,80,100000
+import streamlit as st
+import pandas as pd
+import random
+
+st.set_page_config(page_title="Brasfoot Global", layout="wide")
+
+# --- CARREGAMENTO DE DADOS ---
+@st.cache_data
+def load_data():
+    try:
+        # Lemos o arquivo e ignoramos linhas com erro para não travar
+        df = pd.read_csv("times.csv", on_bad_lines='skip')
+        # Padronização absoluta das colunas
+        df.columns = ['nome', 'pais', 'divisao', 'forca']
+        # Criamos as colunas de pontos e jogos se não existirem
+        for col in ['p', 'v', 'e', 'd', 'j']:
+            df[col] = 0
+        return df
+    except Exception as e:
+        st.error(f"Erro ao carregar banco de dados: {e}")
+        return pd.DataFrame()
+
+# --- LÓGICA DE FIM DE TEMPORADA ---
+def virar_temporada():
+    df = st.session_state.tabela_global.copy()
+    
+    for pais in df['pais'].unique():
+        for d in sorted(df[df['pais'] == pais]['divisao'].unique()):
+            # Ordena times da divisão por pontos (p) e vitórias (v)
+            times_div = df[(df['pais'] == pais) & (df['divisao'] == d)].sort_values(by=['p', 'v'], ascending=False)
+            
+            if len(times_div) >= 2:
+                # Subida (se não for a 1ª divisão)
+                if d > 1:
+                    subindo = times_div.iloc[:2].index
+                    df.loc[subindo, 'divisao'] -= 1
+                # Descida (se houver divisão abaixo)
+                max_div = df[df['pais'] == pais]['divisao'].max()
+                if d < max_div:
+                    descendo = times_div.iloc[-2:].index
+                    df.loc[descendo, 'divisao'] += 1
+                    
+    # Reseta tudo para o novo ano
+    for col in ['p', 'v', 'e', 'd', 'j']: df[col] = 0
+    st.session_state.tabela_global = df
+    st.session_state.rodada = 1
+    st.success("Temporada encerrada! Subidas e descidas processadas.")
+
+# --- INICIALIZAÇÃO ---
+if 'tabela_global' not in st.session_state:
+    st.session_state.tabela_global = load_data()
+    st.session_state.rodada = 1
+
+# --- TELA DE SELEÇÃO ---
+if 'meu_time' not in st.session_state:
+    st.title("⚽ Brasfoot Global - Início")
+    df = st.session_state.tabela_global
+    
+    if not df.empty:
+        c1, c2 = st.columns(2)
+        p_sel = c1.selectbox("País", sorted(df['pais'].unique()))
+        d_sel = c2.selectbox("Divisão", sorted(df[df['pais'] == p_sel]['divisao'].unique()))
+        
+        times_list = df[(df['pais'] == p_sel) & (df['divisao'] == d_sel)]['nome'].tolist()
+        t_sel = st.selectbox("Escolha seu Clube", sorted(times_list))
+        
+        if st.button("Iniciar Carreira"):
+            st.session_state.meu_time = t_sel
+            st.rerun()
+else:
+    # --- INTERFACE DO TREINADOR ---
+    st.sidebar.title(f"🏆 {st.session_state.meu_time}")
+    st.sidebar.write(f"Rodada atual: {st.session_state.rodada}")
+    
+    if st.sidebar.button("Sair do Jogo"):
+        del st.session_state.meu_time
+        st.rerun()
+
+    menu = st.tabs(["Jogar Rodada", "Classificação"])
+
+    with menu[0]:
+        if st.session_state.rodada <= 10: # Temporada curta de 10 rodadas para teste
+            st.subheader(f"Simular Rodada {st.session_state.rodada}")
+            if st.button("⚽ SIMULAR PARTIDAS"):
+                df = st.session_state.tabela_global
+                for i, row in df.iterrows():
+                    # Lógica de pontuação baseada na força
+                    res = random.randint(0, 100)
+                    if res < (row['forca'] / 2 + 15): # Vitória
+                        df.at[i, 'p'] += 3
+                        df.at[i, 'v'] += 1
+                    elif res < 75: # Empate
+                        df.at[i, 'p'] += 1
+                    df.at[i, 'j'] += 1
+                st.session_state.rodada += 1
+                st.rerun()
+        else:
+            st.warning("O campeonato terminou!")
+            if st.button("🏆 PRÓXIMA TEMPORADA"):
+                virar_temporada()
+                st.rerun()
+
+    with menu[1]:
+        p_v = st.selectbox("Ver País", sorted(st.session_state.tabela_global['pais'].unique()))
+        d_v = st.selectbox("Ver Divisão", sorted(st.session_state.tabela_global[st.session_state.tabela_global['pais'] == p_v]['divisao'].unique()))
+        
+        filt = st.session_state.tabela_global[(st.session_state.tabela_global['pais'] == p_v) & (st.session_state.tabela_global['divisao'] == d_v)]
+        st.table(filt[['nome', 'forca', 'p', 'v', 'j']].sort_values(by=['p', 'v'], ascending=False))
