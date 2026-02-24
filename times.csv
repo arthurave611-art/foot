@@ -1,9 +1,50 @@
-nome,pais,divisao,forca
-Manchester City,Inglaterra,1,90
-Arsenal,Inglaterra,1,88
-Real Madrid,Espanha,1,91
-Barcelona,Espanha,1,88
-Flamengo,Brasil,1,82
-Palmeiras,Brasil,1,81
-Benfica,Portugal,1,80
-Ajax,Holanda,1,79
+import pandas as pd
+
+# Estrutura: [Nome, País, Divisão, Força Estimada]
+dados_globais = [
+    # --- BRASIL (Séries A, B, C, D) ---
+    ["Palmeiras", "Brasil", 1, 85], ["Flamengo", "Brasil", 1, 85], ["Botafogo", "Brasil", 1, 82], ["Atletico-MG", "Brasil", 1, 82],
+    ["Sao Paulo", "Brasil", 1, 80], ["Internacional", "Brasil", 1, 79], ["Cruzeiro", "Brasil", 1, 78], ["Corinthians", "Brasil", 1, 77],
+    ["Santos", "Brasil", 2, 74], ["Sport", "Brasil", 2, 72], ["Goias", "Brasil", 2, 70], ["Coritiba", "Brasil", 2, 70],
+    ["America-MG", "Brasil", 2, 68], ["Ceara", "Brasil", 2, 69], ["Amazonas", "Brasil", 2, 65], ["Avai", "Brasil", 2, 66],
+    ["Nautico", "Brasil", 3, 60], ["Remo", "Brasil", 3, 60], ["ABC", "Brasil", 3, 58], ["Figueirense", "Brasil", 3, 58],
+    ["Santa Cruz", "Brasil", 4, 52], ["Brasiliense", "Brasil", 4, 50], ["Ipora", "Brasil", 4, 48], ["Retro", "Brasil", 4, 52],
+
+    # --- INGLATERRA (Premier, Championship, L1, L2) ---
+    ["Man City", "Inglaterra", 1, 93], ["Arsenal", "Inglaterra", 1, 91], ["Liverpool", "Inglaterra", 1, 90], ["Chelsea", "Inglaterra", 1, 86],
+    ["Leicester", "Inglaterra", 2, 78], ["Leeds", "Inglaterra", 2, 77], ["Southampton", "Inglaterra", 2, 76], ["Hull City", "Inglaterra", 2, 73],
+    ["Bolton", "Inglaterra", 3, 66], ["Derby County", "Inglaterra", 3, 65], ["Reading", "Inglaterra", 3, 63], ["Portsmouth", "Inglaterra", 3, 64],
+    ["Wrexham", "Inglaterra", 4, 58], ["Notts County", "Inglaterra", 4, 55], ["Stockport", "Inglaterra", 4, 54], ["Milton Keynes", "Inglaterra", 4, 53],
+
+    # --- ESPANHA (La Liga, Segunda) ---
+    ["Real Madrid", "Espanha", 1, 94], ["Barcelona", "Espanha", 1, 90], ["Atletico Madrid", "Espanha", 1, 87], ["Girona", "Espanha", 1, 81],
+    ["Espanyol", "Espanha", 2, 75], ["Valladolid", "Espanha", 2, 74], ["Eibar", "Espanha", 2, 73], ["Elche", "Espanha", 2, 72],
+
+    # --- ALEMANHA (1, 2, 3) ---
+    ["Bayern", "Alemanha", 1, 91], ["Leverkusen", "Alemanha", 1, 89], ["Dortmund", "Alemanha", 1, 87], ["Leipzig", "Alemanha", 1, 86],
+    ["Schalke 04", "Alemanha", 2, 76], ["Hamburg", "Alemanha", 2, 77], ["Hertha Berlin", "Alemanha", 2, 75], ["St Pauli", "Alemanha", 2, 74],
+    ["Dresden", "Alemanha", 3, 65], ["Arminia", "Alemanha", 3, 64], ["Duisburg", "Alemanha", 3, 62], ["Munchen 1860", "Alemanha", 3, 63],
+
+    # --- ITÁLIA (A, B) ---
+    ["Inter", "Italia", 1, 90], ["Milan", "Italia", 1, 88], ["Juventus", "Italia", 1, 87], ["Napoli", "Italia", 1, 85],
+    ["Sampdoria", "Italia", 2, 74], ["Parma", "Italia", 2, 75], ["Spezia", "Italia", 2, 72], ["Bari", "Italia", 2, 71],
+
+    # --- AMÉRICA DO SUL ---
+    ["River Plate", "Argentina", 1, 82], ["Boca Juniors", "Argentina", 1, 80], ["Racing", "Argentina", 2, 70], ["Independiente", "Argentina", 2, 69],
+    ["Colo-Colo", "Chile", 1, 75], ["U. de Chile", "Chile", 1, 72],
+    ["Atl. Nacional", "Colombia", 1, 76], ["Millonarios", "Colombia", 1, 74],
+    ["Peñarol", "Uruguai", 1, 73], ["Nacional", "Uruguai", 1, 73],
+    ["LDU", "Equador", 1, 75], ["Ind. del Valle", "Equador", 1, 77],
+    ["Olimpia", "Paraguai", 1, 72], ["Cerro Porteño", "Paraguai", 1, 72],
+    ["Alianza Lima", "Peru", 1, 70], ["Universitario", "Peru", 1, 70],
+
+    # --- EXTRAS ---
+    ["Benfica", "Portugal", 1, 84], ["Porto", "Portugal", 1, 83], ["Sporting", "Portugal", 1, 83],
+    ["Ajax", "Holanda", 1, 81], ["PSV", "Holanda", 1, 83], ["Feyenoord", "Holanda", 1, 82],
+    ["Inter Miami", "EUA", 1, 77], ["LA Galaxy", "EUA", 1, 75], ["Columbus Crew", "EUA", 1, 74],
+    ["Club America", "Mexico", 1, 78], ["Tigres", "Mexico", 1, 77], ["Monterrey", "Mexico", 1, 78]
+]
+
+df = pd.DataFrame(dados_globais, columns=["nome", "pais", "divisao", "forca"])
+df.to_csv("times.csv", index=False)
+print(f"Sucesso! {len(df)} times gerados no arquivo times.csv.")
